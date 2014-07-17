@@ -1,8 +1,8 @@
 TARGET		=	learnPMI
 
 INCLUDES	=	./CppLib/
-# MeCab$B$rFH<+$K%3%s%Q%$%k$7$?>l9g!$(BMeCab$B%$%s%9%H!<%k%G%#%l%/%H%jCf$N!$(B
-# mecab.h$B$,$"$k%G%#%l%/%H%j$X$N%Q%9$r(BMECAB_INCLUDE$B$K5-:\$9$k$3$H!%(B
+# MeCabを独自にコンパイルした場合，MeCabインストールディレクトリ中の，
+# mecab.hがあるディレクトリへのパスをMECAB_INCLUDEに記載すること．
 MECAB_INCLUDE	=	
 
 HEADERS		=	$(INCLUDES)vital.h\
@@ -13,7 +13,7 @@ SOURCES		=	main.cpp\
 				$(INCLUDES)pmi.cpp
 
 CXX			=	g++
-# MECAB_INCLUDE$B$,JQ?t$H$7$F@_Dj$5$l$F$$$k$+H]$+$G%$%s%/%k!<%I%Q%9@_DjJQ99(B
+# MECAB_INCLUDEが変数として設定されているか否かでインクルードパス設定変更
 ifeq ($(MECAB_INCLUDE),)
 	CXXFLAGS	=	-c -O3 -Wall -I$(INCLUDES)
 else
@@ -23,17 +23,17 @@ endif
 LINKER		=	g++ 
 LFLAGS		=	-O3 -Wall `mecab-config --cflags` `mecab-config --libs`
 
-# SOURCES$BCf$N(B.cpp$B$r(B.o$B$KCV49$7$?$b$N$r(BOBJECTS$B$H$9$k!%(B
-# $B;XDj$,$J$$(B($BC1$K(Bmake$B%3%^%s%I$r<B9T$7$?(B)$B$H$-!$0lHV:G=i$N@8@.%k!<%k$r<B9T$9$k!%(B
+# SOURCES中の.cppを.oに置換したものをOBJECTSとする．
+# 指定がない(単にmakeコマンドを実行した)とき，一番最初の生成ルールを実行する．
 OBJECTS		=	$(SOURCES:.cpp=.o)
 
-### $B0J2<!$%U%!%$%k@8@.%k!<%k(B
+### 以下，ファイル生成ルール
 $(TARGET):	$(OBJECTS)
 	@echo Linking...
 	$(LINKER) -o $(TARGET) $(OBJECTS) $(LFLAGS)
 
-# .o $B$O(B .cpp $B$+$i:n$j$^$9!%(B
-# $< : $B:G=i$K0MB8$9$k%U%!%$%kL>!$$9$J$o$A(B$(SOURCES)
+# .o は .cpp から作ります．
+# $< : 最初に依存するファイル名，すなわち$(SOURCES)
 .cpp.o:	$(SOURCES) $(HEADERS)
 	$(CXX) $(CXXFLAGS) $<
 	@mv $(@F) $(@D)
