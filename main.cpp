@@ -22,7 +22,7 @@ int main(int argc, char const* argv[])
     map<pair<string, string>, double> pmi_hash;
 
     // ファイルリストを生成する
-    string src_directory= "../../B3semi/tf-idf/assignment_tfidf/";
+    string src_directory= "";
     // string src_directory= "/home/sia/Documents/B3semi/tf-idf/assignment_tfidf/";
     // string dst_directory= "/home/sia/Documents/project/c++Read/result/";
     vector<string> file_list = vital::GetFileList(src_directory);
@@ -106,7 +106,7 @@ int main(int argc, char const* argv[])
         }
         double t_value = pmi::CalcTValue(freq_x, freq_y, freq_xy, frame_count);
         if (t_value > threshold) {
-            pmi_hash[make_pair(word_x,word_y)] = log( (double)(freq_xy * frame_count) / (double)(freq_x * freq_y));
+            pmi_hash[make_pair(word_x,word_y)] = (log( (double)(freq_xy * frame_count) / (double)(freq_x * freq_y)) / (-1 * log( ( (double) freq_xy / (double) frame_count))));
         }
     }
 
