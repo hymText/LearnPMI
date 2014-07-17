@@ -1,12 +1,10 @@
 TARGET		=	learnPMI
 
-CXX			=	g++
-CXXFLAGS	=	-c -O3 -Wall
-
-LINKER		=	g++ 
-LFLAGS		=	-O3 -Wall `mecab-config --cflags` `mecab-config --libs`
-
 INCLUDES	=	./CppLib/
+# MeCabを独自にコンパイルした場合，MeCabインストールディレクトリ中の，
+# mecab.hがあるディレクトリへのパスをMECAB_INCLUDEに記載すること．
+MECAB_INCLUDE	=	
+
 HEADERS		=	$(INCLUDES)vital.h\
 				$(INCLUDES)pmi.h
 
@@ -14,17 +12,28 @@ SOURCES		=	main.cpp\
 				$(INCLUDES)vital.cpp\
 				$(INCLUDES)pmi.cpp
 
-# subst(a,b,$(x)) Xの中のaをbに置換
-# filter(pattern,text) : textのpatternに一致するものを抽出
-#OBJECTS		=	$(subst .cpp,.o,$(filter %.cpp,$(SOURCES)))
+CXX			=	g++
+# MECAB_INCLUDEが変数として設定されているか否かでインクルードパス設定変更
+ifeq ($(MECAB_INCLUDE),)
+	CXXFLAGS	=	-c -O3 -Wall -I$(INCLUDES)
+else
+	CXXFLAGS	=	-c -O3 -Wall -I$(INCLUDES) -I$(MECAB_INCLUDE)
+endif
+
+LINKER		=	g++ 
+LFLAGS		=	-O3 -Wall `mecab-config --cflags` `mecab-config --libs`
+
+# SOURCES中の.cppを.oに置換したものをOBJECTSとする．
+# 指定がない(単にmakeコマンドを実行した)とき，一番最初の生成ルールを実行する．
 OBJECTS		=	$(SOURCES:.cpp=.o)
 
-# .o は .cpp から作ります．
-# $< : 最初に依存するファイル名，すなわち$(HEADERS)
+### 以下，ファイル生成ルール
 $(TARGET):	$(OBJECTS)
 	@echo Linking...
 	$(LINKER) -o $(TARGET) $(OBJECTS) $(LFLAGS)
 
+# .o は .cpp から作ります．
+# $< : 最初に依存するファイル名，すなわち$(SOURCES)
 .cpp.o:	$(SOURCES) $(HEADERS)
 	$(CXX) $(CXXFLAGS) $<
 	@mv $(@F) $(@D)

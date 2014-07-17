@@ -22,7 +22,8 @@ int main(int argc, char const* argv[])
     map<pair<string, string>, double> pmi_hash;
 
     // ファイルリストを生成する
-    string src_directory= "";
+    // string src_directory= "/home/sia/Documents/csj/ref_save/";
+    string src_directory= "/home/sia/Develop/LearnPMI/test/";
     // string src_directory= "/home/sia/Documents/B3semi/tf-idf/assignment_tfidf/";
     // string dst_directory= "/home/sia/Documents/project/c++Read/result/";
     vector<string> file_list = vital::GetFileList(src_directory);
