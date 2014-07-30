@@ -22,10 +22,12 @@ int main(int argc, char const* argv[])
     map<pair<string, string>, double> pmi_hash;
 
     // ファイルリストを生成する
-    // string src_directory= "/home/sia/Documents/csj/ref_save/";
-    string src_directory= "/home/sia/Develop/LearnPMI/test/";
-    // string src_directory= "/home/sia/Documents/B3semi/tf-idf/assignment_tfidf/";
-    // string dst_directory= "/home/sia/Documents/project/c++Read/result/";
+    if (argc != 2) {
+        cerr << "引数の数が間違っています．" << endl;
+        return 0;
+    }
+    const char* src_directory_char = argv[1];
+    string src_directory= src_directory_char;
     vector<string> file_list = vital::GetFileList(src_directory);
 
     int frame_count = 0;
