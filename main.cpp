@@ -14,11 +14,11 @@ using namespace std;
 int main(int argc, char const* argv[])
 {
     // パラメータ設定
-    int size = 20;
-    int shift = 10;
-    double threshold = 1.65;
+    int size = 20;              // フレームサイズ
+    int shift = 10;             // フレームシフト
+    double threshold = 1.65;    // t検定閾値(有意水準5%)
 
-    // 
+    // PMIの結果を格納する二重ハッシュ
     map<pair<string, string>, double> pmi_hash;
 
     // ファイルリストを生成する
@@ -58,32 +58,14 @@ int main(int argc, char const* argv[])
             pmi::SegmentedDocument seg_doc = (pmi::SegmentedDocument)*it;
             seg_doc.AddCount(&word_count, &conbination_count);
         }
-
-// 
-//         string wc_filepath
-//         ofstream wc_ofs(dst_directory + "wc_" + (string)(*it) );
-//         ofstream cc_ofs(dst_directory + "cc_" + (string)(*it) );
-//         for(vector<pair<string,string>, int>:iterator it = conbination_count.begin(); it != conbination_count.end(); it++){
-//             string word_x = (*it).first.first;
-//             string word_y = (*it).first.second;
-//         }
-
     }
 
-//     for(map<string, int>::iterator it = word_count.begin(); it != word_count.end(); it++){
-//         string word = (*it).first;
-// 
-//         cout << word << "\t" << word_count[word] << endl;
-//     }
-// 
-//     cout << "============================================================" << endl;
-// 
-//     for(map<pair<string,string>, int>::iterator it = conbination_count.begin(); it != conbination_count.end(); it++){
-//         string word_x = (*it).first.first;
-//         string word_y = (*it).first.second;
-// 
-//         cout << word_x << "\t" << word_y << "\t" << conbination_count[ (make_pair(word_x,word_y)) ] << endl;
-//     }
+    // 単語ペアとその出現回数を出力する(デバッグ用)
+    // for(map<string, int>::iterator it = word_count.begin(); it != word_count.end(); it++){
+    //     string word = (*it).first;
+    //
+    //     cout << word << "\t" << word_count[word] << endl;
+    // }
 
     // 共起数0のペアと共起数1のペアをカウントし，チューリング推定量を計算
     int no_occur = ((word_count.size() * (word_count.size()-1) ) / 2) - conbination_count.size();  
@@ -108,12 +90,14 @@ int main(int argc, char const* argv[])
             freq_xy = turing_value;
         }
         double t_value = pmi::CalcTValue(freq_x, freq_y, freq_xy, frame_count);
+
         if (t_value > threshold) {
-            pmi_hash[make_pair(word_x,word_y)] = (log( (double)(freq_xy * frame_count) / (double)(freq_x * freq_y)) / (-1 * log( ( (double) freq_xy / (double) frame_count))));
+            // 桁溢れに注意し，double型キャストする．
+            pmi_hash[make_pair(word_x,word_y)] = (log( (double)(freq_xy * frame_count) / (double)((double)freq_x * (double)freq_y)) / (-1 * log( ( (double) freq_xy / (double) frame_count))));
         }
     }
 
-    // PMIの出力
+    // // PMIの出力
     for(map<pair<string,string>, double>::iterator it = pmi_hash.begin(); it != pmi_hash.end(); it++){
         cout << (*it).first.first << "\t" << (*it).first.second << "\t" << (*it).second << endl;
     }
