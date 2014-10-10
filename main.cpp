@@ -17,6 +17,14 @@ int main(int argc, char const* argv[])
     int size = 20;              // フレームサイズ
     int shift = 10;             // フレームシフト
     double threshold = 1.65;    // t検定閾値(有意水準5%)
+    const char* char_pos_arr[] = {"名詞", "形容詞"};
+
+    //char_pos_arrをvector<string>に変換
+    vector<string> content_poslist;
+    int pos_count = (int)sizeof(char_pos_arr) / (int)sizeof(char_pos_arr[0]);
+    for (int i = 0; i < pos_count; i++) {
+        content_poslist.push_back(char_pos_arr[i]);
+    }
 
     // PMIの結果を格納する二重ハッシュ
     map<pair<string, string>, double> pmi_hash;
@@ -48,7 +56,7 @@ int main(int argc, char const* argv[])
         pmi::Document document(&contents);
 
         // Documentからフレーム化して，SegmentedDocumentクラスの配列に
-        vector<pmi::SegmentedDocument> seg_doc_arr = document.Segment(size,shift);
+        vector<pmi::SegmentedDocument> seg_doc_arr = document.Segment(size,shift, content_poslist);
 
         // フレーム数をカウント
         frame_count += seg_doc_arr.size();
@@ -56,7 +64,8 @@ int main(int argc, char const* argv[])
         // 単語の生起回数と共起回数をカウント
         for(vector<pmi::SegmentedDocument>::iterator it = seg_doc_arr.begin(); it != seg_doc_arr.end(); it++){
             pmi::SegmentedDocument seg_doc = (pmi::SegmentedDocument)*it;
-            seg_doc.AddCount(&word_count, &conbination_count);
+            // seg_doc.Print();
+            seg_doc.AddCount(&word_count, &conbination_count, content_poslist);
         }
     }
 
