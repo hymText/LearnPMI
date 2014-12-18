@@ -45,30 +45,27 @@ int main(int argc, char const* argv[])
     // 各ファイルに対して操作
     int file_count = 0;
     for(vector<string>::iterator it = file_list.begin(); it != file_list.end(); it++){
-        try {
-            // ファイルを一括で読み込む
-            string file_path = src_directory + (string)(*it);
-            file_count++;
-            cerr << "Reading... " << file_count << " : " << file_path << endl;
-            string contents = vital::fileRead(file_path);
 
-            // 読み込んだ内容をDocumentクラスに格納
-            pmi::Document document(&contents);
+        // ファイルを一括で読み込む
+        string file_path = src_directory + (string)(*it);
+        file_count++;
+        cerr << "Reading... " << file_count << " : " << file_path << endl;
+        string contents = vital::fileRead(file_path);
 
-            // Documentからフレーム化して，SegmentedDocumentクラスの配列に
-            vector<pmi::SegmentedDocument> seg_doc_arr = document.Segment(size,shift, content_poslist);
-            
-            // フレーム数をカウント
-            frame_count += seg_doc_arr.size();
-     
-            // 単語の生起回数と共起回数をカウント
-            for(vector<pmi::SegmentedDocument>::iterator it = seg_doc_arr.begin(); it != seg_doc_arr.end(); it++){
-                pmi::SegmentedDocument seg_doc = (pmi::SegmentedDocument)*it;
-                // seg_doc.Print();
-                seg_doc.AddCount(&word_count, &conbination_count, content_poslist);
-            }
-        } catch (char *str) {
-            cerr << str << endl;  
+        // 読み込んだ内容をDocumentクラスに格納
+        pmi::Document document(&contents);
+
+        // Documentからフレーム化して，SegmentedDocumentクラスの配列に
+        vector<pmi::SegmentedDocument> seg_doc_arr = document.Segment(size,shift, content_poslist);
+
+        // フレーム数をカウント
+        frame_count += seg_doc_arr.size();
+        
+        // 単語の生起回数と共起回数をカウント
+        for(vector<pmi::SegmentedDocument>::iterator it = seg_doc_arr.begin(); it != seg_doc_arr.end(); it++){
+            pmi::SegmentedDocument seg_doc = (pmi::SegmentedDocument)*it;
+            // seg_doc.Print();
+            seg_doc.AddCount(&word_count, &conbination_count, content_poslist);
         }
     }
 
@@ -88,27 +85,27 @@ int main(int argc, char const* argv[])
         }
     }
     double turing_value = (double)occur_once / (double)no_occur;
-    
+
     // 実際にPMIを計算する
     for(map<pair<string,string>, int>::iterator it = conbination_count.begin(); it != conbination_count.end(); it++){
         string word_x = (*it).first.first;
         string word_y = (*it).first.second;
-    
+
         int freq_x = word_count[word_x];
         int freq_y = word_count[word_y];
         double freq_xy = (double)conbination_count[make_pair(word_x, word_y)];
-    
+
         if (freq_xy <= 0) {
             freq_xy = turing_value;
         }
         double t_value = pmi::CalcTValue(freq_x, freq_y, freq_xy, frame_count);
-    
+
         if (t_value > threshold) {
             // 桁溢れに注意し，double型キャストする．
             pmi_hash[make_pair(word_x,word_y)] = (log( (double)(freq_xy * frame_count) / (double)((double)freq_x * (double)freq_y)) / (-1 * log( ( (double) freq_xy / (double) frame_count))));
         }
     }
-    
+
     // // PMIの出力
     for(map<pair<string,string>, double>::iterator it = pmi_hash.begin(); it != pmi_hash.end(); it++){
         cout << (*it).first.first << "\t" << (*it).first.second << "\t" << (*it).second << endl;
