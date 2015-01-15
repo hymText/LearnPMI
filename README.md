@@ -16,7 +16,8 @@ Notice
 How to use
 ==========
 ### コンパイル
-$ make
+$ make  
+(Ubuntuの場合，libmecab-devをapt-getでインストールする必要がある．)
 
 ### /path/to/corpus/ディレクトリにあるテキストファイル群を使ってPMIを学習
 $ ./learnPMI /path/to/corpus/ > output.txt
